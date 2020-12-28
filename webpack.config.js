@@ -33,6 +33,7 @@ const browserConfig = {
         extensions: [".ts", ".js"],
         fallback: {
             querystring: require.resolve("querystring-es3"),
+            seedrandom: require.resolve("seedrandom"),
         }
     },
     output: {
