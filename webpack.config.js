@@ -1,4 +1,47 @@
 const path = require("path");
+const nodeBuiltins = require("builtin-modules");
+
+const lambdaConfig = {
+    entry: {
+        "bot": path.resolve(__dirname + "/src/bot/bot.ts"),
+    },
+    mode: "production",
+    target: "node",
+    externals: {
+        ...nodeBuiltins,
+    },
+    module: {
+        rules: [
+            {
+                test: /\.node$/,
+                use: "node-loader",
+            },
+            {
+                test: /.ts$/,
+                loader: "ts-loader",
+                exclude: /node_modules/,
+                options: {
+                    configFile: "tsconfig-webpack-node.json",
+                    transpileOnly: true,
+                },
+            },
+        ],
+    },
+    // optimization: {
+    //     removeAvailableModules: true,
+    //     removeEmptyChunks: true,
+    //     splitChunks: false,
+    //     minimize: true,
+    // },
+    resolve: {
+        extensions: [".ts", ".js"],
+    },
+    output: {
+        path: path.resolve(__dirname, "lambda"),
+        libraryTarget: "commonjs2",
+    },
+};
+
 
 const browserConfig = {
     entry: {
@@ -45,4 +88,4 @@ const browserConfig = {
     },
 };
 
-module.exports = [browserConfig];
+module.exports = [lambdaConfig];

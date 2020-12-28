@@ -36,7 +36,12 @@ import m34 from "./crpsregression_electricity_load_nyiso_west_json_lag_1";
 import m35 from "./crpsregression_electricity_load_nyiso_west_json_lag_12";
 import m36 from "./crpsregression_electricity_load_nyiso_west_json_lag_3";
 
-import { ModelParent } from "./model-parent";
+import { ModelParent, WeatherData } from "./model-parent";
+import * as qs from 'querystring';
+const bent = require('bent');
+const getJSON = bent('json');
+
+export const available_models: Array<{ stream_name: string, lag_interval: number }> = [];
 
 const model_lookups: { [key: string]: ModelParent } = {};
 for (const i of [
@@ -78,6 +83,28 @@ for (const i of [
   m36,
 ]) {
   model_lookups[i.stream_name + "|" + i.lag_interval] = new i.model();
+  available_models.push({ stream_name: i.stream_name, lag_interval: i.lag_interval });
+}
+
+export async function getWeatherForModels(models: Array<ModelParent>,
+  time: string): Promise<WeatherData> {
+
+  const h3_indexes = new Set<string>();
+  const weather_products = new Set<string>();
+  for (const model of models) {
+    model.weather_h3_indexes().forEach(i => h3_indexes.add(i));
+    model.weather_forecast_products().forEach(i => weather_products.add(i));
+  }
+
+  const url_parameters = qs.encode({
+    time: time,
+    products: Array.from(weather_products).join(","),
+    h3_indexes: Array.from(h3_indexes).join(","),
+  });
+
+  const weather_data = await getJSON(`https://api.ionized.cloud/weather?` + url_parameters);
+
+  return weather_data;
 }
 
 export function getModel(

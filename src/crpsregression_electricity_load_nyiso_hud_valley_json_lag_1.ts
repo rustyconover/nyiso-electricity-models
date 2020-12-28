@@ -2,7 +2,7 @@ import * as tf from '@tensorflow/tfjs';
 import moment from 'moment';
 import * as qs from 'querystring';
 import * as microprediction from 'microprediction';
-import { ModelParent } from './model-parent';
+import { ModelParent, WeatherData } from './model-parent';
 
 const bent = require('bent');
 const getJSON = bent('json');
@@ -25,7 +25,15 @@ static model_regressor_names: Array<string> = ["hrrr_10_metre_v_wind_component_1
 static locations_to_h3: {[name: string]: string} = {"jfk":"862a103b7ffffff","syracuse":"862b8a2e7ffffff","plattsburgth":"862b8c8efffffff","staten island":"862a1062fffffff","utica":"862b8bd67ffffff","massena":"862b8e92fffffff","schenectady":"862b89187ffffff","poughkeepsie":"862a16b0fffffff","fredonia":"862ab5b17ffffff","canandaigua":"862aa4c8fffffff","binghampton":"862aa5d6fffffff","islip":"862a10a27ffffff","elmira":"862aa42e7ffffff","newburgh":"862a16a57ffffff","buffalo":"862aa6cb7ffffff","white plains":"862a10c4fffffff","monticello":"862a160f7ffffff","rochester":"862b9931fffffff","watertown":"862b8a987ffffff","albany":"862b8902fffffff","lga":"862a100f7ffffff","rome":"862b8bd37ffffff","nyc":"862a100d7ffffff","jamestown":"862ab5a4fffffff"};
 static needed_weather_features = ["10_metre_u_wind_component_10","10_metre_v_wind_component_10","temperature_0"];
 
-        async regressors(forecast_time: string): Promise<{ [name: string]: number }> {
+        weather_h3_indexes() {
+            return Object.values(ModelClass.locations_to_h3);
+        }
+
+        weather_forecast_products() {
+            return ModelClass.needed_weather_features;
+        }
+
+        async regressors(forecast_time: string, existing_weather_data: WeatherData | undefined): Promise<{ [name: string]: number }> {
             const ft = moment.utc(forecast_time);
             const stream_start = moment.utc("2020-09-15T00:05:00");
 
@@ -37,11 +45,12 @@ static needed_weather_features = ["10_metre_u_wind_component_10","10_metre_v_win
 
             // console.log(url_parameters);
 
-            const weather_data: {
-                [product_name: string]: {
-                    [h3_index: string]: number
-                }
-            } = await getJSON(`https://api.ionized.cloud/weather?` + url_parameters);
+            let weather_data: WeatherData;
+            if (existing_weather_data == null) {
+              weather_data = await getJSON(`https://api.ionized.cloud/weather?` + url_parameters);
+            } else {
+              weather_data = existing_weather_data;
+            }
 
             // console.log(weather_data);
 

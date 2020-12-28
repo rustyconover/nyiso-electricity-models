@@ -1,16 +1,18 @@
 {
   "name": "@rustyconover/nyiso-electricity-models",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "A collection of Tensorflow.js models for NYISO electricity demand, generation and pricing for use with microprediction.org.",
   "main": "lib/index.js",
   "browser": "dist/nyiso-electricity-models.js",
   "types": "lib/index.d.ts",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/rustyconover/nyiso-electricity-models"
+    "type": "git",
+    "url": "https://github.com/rustyconover/nyiso-electricity-models"
   },
   "scripts": {
-    "build": "rm -rf dist lib && tsc && webpack -c webpack.config.js",
+    "deploy-lambda": "aws lambda update-function-code --function-name electricity-bot --s3-bucket weather-lambdas --s3-key bot.zip --publish",
+    "build-lambda": "zip -9 -r dist.zip lambda/ && aws s3 cp dist.zip s3://weather-lambdas/bot.zip",
+    "build": "rm -rf dist lib lambda && webpack -c webpack.config.js",
     "test": "ts-node test/simple-model.ts"
   },
   "keywords": [
@@ -21,7 +23,11 @@
   "license": "MIT",
   "dependencies": {
     "@tensorflow/tfjs": "^2.7.0",
+    "@types/aws-lambda": "^8.10.68",
+    "@types/lodash": "^4.14.166",
+    "aws-lambda": "^1.0.6",
     "bent": "^7.3.12",
+    "lodash": "^4.17.20",
     "microprediction": "^1.0.8",
     "moment": "^2.29.1",
     "tslib": "^2.0.3",
