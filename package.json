@@ -1,12 +1,12 @@
 {
   "name": "@rustyconover/nyiso-electricity-models",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A collection of Tensorflow.js models for NYISO electricity demand, generation and pricing for use with microprediction.org.",
   "main": "lib/index.js",
   "browser": "dist/nyiso-electricity-models.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist lib && tsc && webpack -c webpack.config.js",
+    "prepublish": "rm -rf dist lib && tsc && webpack -c webpack.config.js",
     "test": "ts-node test/simple-model.ts"
   },
   "keywords": [
