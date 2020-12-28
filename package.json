@@ -6,7 +6,7 @@
   "browser": "dist/nyiso-electricity-models.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "prepare": "npm install && rm -rf dist lib && tsc && webpack -c webpack.config.js",
+    "prepare": "rm -rf dist lib && tsc && webpack -c webpack.config.js",
     "test": "ts-node test/simple-model.ts"
   },
   "keywords": [
