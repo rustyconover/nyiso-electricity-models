@@ -16,7 +16,47 @@ about what the true value will be to form a probablity distribution.
 
 ## Microprediction.org Prediction Bot
 
-Also included in `src/bot/bot.ts` is a [Microprediction.org](http://microprediction.com) robot that submits the predictions from the models as part of the electicity prediction competition.
+A simple [Microprediction.org](http://microprediction.com) prediction
+robot is included in [`src/bot/bot.ts`](https://github.com/rustyconover/nyiso-electricity-models/blob/master/src/bot/bot.ts) that submits the
+predictions from the models as part of the electicity prediction competition.
+
+## Examples
+
+### Utilize a model to generate predictions.
+
+This example shows how to use a model to generate predictions:
+
+```js
+import * as models from "@rustyconover/nyiso-electricity-models";
+import moment from "moment";
+
+async function exampleModelUsage() {
+  // Load a model that predicts the overall electicity load/demand
+  // for the entire state of New York an hour ahead.
+  //
+  // 12 forecast intervals ahead is an hour since each forecast
+  // interval is five minutes.
+  const model = models.getModel("electricity-load-nyiso-overall.json", 12);
+  const target_time = moment.utc().format("YYYY-MM-DDTHH:mm:ss");
+
+  // Obtain the regressors of the model.
+  const regressors = await model.regressors(target_time, undefined);
+
+  // Using the regressors retrieve the predictions.
+  const predicted_values = await model.predict(regressors);
+
+  // The 225 predicted values form a non-parameteric probablity distribution
+  // which express the model's prediction of the electricity demand
+  // an hour from the current time.
+
+  console.log(predicted_values);
+}
+
+exampleModelUsage().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
+```
 
 ## Model Data Sources
 
