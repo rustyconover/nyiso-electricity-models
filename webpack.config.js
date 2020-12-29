@@ -27,12 +27,12 @@ const lambdaConfig = {
             },
         ],
     },
-    // optimization: {
-    //     removeAvailableModules: true,
-    //     removeEmptyChunks: true,
-    //     splitChunks: false,
-    //     minimize: true,
-    // },
+    optimization: {
+        removeAvailableModules: true,
+        removeEmptyChunks: true,
+        splitChunks: false,
+        minimize: true,
+    },
     resolve: {
         extensions: [".ts", ".js"],
     },
@@ -88,4 +88,4 @@ const browserConfig = {
     },
 };
 
-module.exports = [lambdaConfig];
+module.exports = [lambdaConfig, browserConfig];
