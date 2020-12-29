@@ -14,6 +14,10 @@ The models make forecasts at the ~1 minute, 5 minutes, 15 minutes
 and 1 hour ahead of time horizons. Each model produces 225 guesses
 about what the true value will be to form a probablity distribution.
 
+## Microprediction.org Prediction Bot
+
+Also included in `src/bot/bot.ts` is a [Microprediction.org](http://microprediction.com) robot that submits the predictions from the models as part of the electicity prediction competition.
+
 ## Model Data Sources
 
 The models use data from these sources:
