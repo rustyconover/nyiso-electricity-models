@@ -120,3 +120,8 @@ export const handler: ScheduledEventHandler = async () => {
     return "Ok";
 };
 
+
+// @ts-ignore
+handler().catch(e => {
+    console.error(e);
+})

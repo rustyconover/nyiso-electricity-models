@@ -7,8 +7,8 @@ can be used in browsers and via AWS Lambda functions.
 The models included are:
 
 - Electricity demand for each NYISO zone.
-- Wind power generation (coming soon)
-- Solar power generation (coming soon)
+- Wind power generation
+- Solar power generation
 
 The models make forecasts at the ~1 minute, 5 minutes, 15 minutes
 and 1 hour ahead of time horizons. Each model produces 225 guesses
