@@ -81,7 +81,17 @@ export const handler: ScheduledEventHandler = async () => {
             const model = models.getModel(record.stream_name, record.lag_interval);
 
             const regressors = await model.regressors(target_time, weather);
-            const points = await model.predict(regressors);
+
+            // Some of the generation streams are integer based streams
+            // so produce integer points.
+            const needs_rounding = record.stream_name.match(/fueltype/);
+            const points = (await model.predict(regressors)).map(v => {
+                if (needs_rounding) {
+                    return Math.round(v);
+                } else {
+                    return v;
+                }
+            })
 
             // Note in the log that the forecasting was successful.
             console.log(`Forecasted ${record.stream_name} ${lag_interval}`);
@@ -119,9 +129,3 @@ export const handler: ScheduledEventHandler = async () => {
     }
     return "Ok";
 };
-
-
-// @ts-ignore
-handler().catch(e => {
-    console.error(e);
-})
