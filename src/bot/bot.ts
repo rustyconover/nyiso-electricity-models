@@ -60,6 +60,10 @@ export const handler: ScheduledEventHandler = async () => {
     // for 5 minutes, 15 minutes and an hour in the future.
     const models_by_lag = _.groupBy(models.available_models, "lag_interval");
 
+    const stream_values = await models.getStreamValuesForModels(
+        models.available_models.map(record => models.getModel(record.stream_name, record.lag_interval)),
+        now_utc.format("YYYY-MM-DDTHH:mm:ss"));
+
     for (const lag_interval of Object.keys(models_by_lag)) {
         // Get the actual time that the lag_interval corresponds to.
         // ideally, this would be five minutes from the last update
@@ -80,14 +84,20 @@ export const handler: ScheduledEventHandler = async () => {
         for (const record of models_by_lag[lag_interval]) {
             const model = models.getModel(record.stream_name, record.lag_interval);
 
-            const regressors = await model.regressors(target_time, weather);
+            const regressors = await model.regressors(target_time, weather, stream_values);
 
             // Some of the generation streams are integer based streams
             // so produce integer points.
             const needs_rounding = record.stream_name.match(/fueltype/);
+
+            // The lbmp streams are price based streams so round to the nearest
+            // cents value.
+            const needs_price_rounding = record.stream_name.match(/lbmp/);
             const points = (await model.predict(regressors)).map(v => {
                 if (needs_rounding) {
                     return Math.round(v);
+                } else if (needs_price_rounding) {
+                    return Math.round(v * 100) / 100;
                 } else {
                     return v;
                 }

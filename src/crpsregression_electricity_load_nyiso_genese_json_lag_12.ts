@@ -2,7 +2,7 @@ import * as tf from '@tensorflow/tfjs';
 import moment from 'moment';
 import * as qs from 'querystring';
 import * as microprediction from 'microprediction';
-import { ModelParent, WeatherData } from './model-parent';
+import { ModelParent, WeatherData, StreamData } from './model-parent';
 
 const bent = require('bent');
 const getJSON = bent('json');
@@ -33,7 +33,15 @@ static needed_weather_features = ["10_metre_u_wind_component_10","10_metre_v_win
             return ModelClass.needed_weather_features;
         }
 
-        async regressors(forecast_time: string, existing_weather_data: WeatherData | undefined): Promise<{ [name: string]: number }> {
+        referenced_streams(): string[] {
+            return [...ModelClass.model_regressor_names.filter(n => n.match(/^stream_/)).map(x => x.replace(/^stream_/, "")),
+                    "electricity-load-nyiso-genese.json"];
+        }
+
+        async regressors(forecast_time: string,
+        existing_weather_data: WeatherData | undefined,
+        stream_data: StreamData
+        ): Promise<{ [name: string]: number }> {
             const ft = moment.utc(forecast_time);
             const stream_start = moment.utc("2020-09-15T01:00:00");
 
@@ -94,11 +102,16 @@ static needed_weather_features = ["10_metre_u_wind_component_10","10_metre_v_win
                     regressors[regressor_name] = v;
                 } else if (periodic_regressors[regressor_name] != null) {
                     regressors[regressor_name] = periodic_regressors[regressor_name];
+                } else if (regressor_name.match(/^stream_/)) {
+                    regressors[regressor_name] = stream_data[regressor_name.replace(/^stream_/, '')];
+                    if(regressors[regressor_name] == null) {
+                        throw new Error("Did not find a stream regressor:" + regressor_name);
+                    }
                 } else if (regressor_name === 'Demand_lag') {
-                    const values = await reader.get_lagged("electricity-load-nyiso-genese.json");
-
-                    const first_smaller_index = values.findIndex(v => v[0] < (ft.valueOf() / 1000));
-                    regressors[regressor_name] = values[first_smaller_index+1][1]
+                    regressors[regressor_name] = stream_data["electricity-load-nyiso-genese.json"];
+                    if(regressors[regressor_name] == null) {
+                        throw new Error("Did not find a stream regressor:" + "electricity-load-nyiso-genese.json");
+                    }
                 } else if (regressor_name.match(/^nyiso-/)) {
                     const v = weather_data["nyiso"][regressor_name];
                     if (v == null) {

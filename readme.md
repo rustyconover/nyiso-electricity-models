@@ -39,8 +39,21 @@ async function exampleModelUsage() {
   const model = models.getModel("electricity-load-nyiso-overall.json", 12);
   const target_time = moment.utc().format("YYYY-MM-DDTHH:mm:ss");
 
+  // Obtain the weather information for the model.
+  const weather = await models.getWeatherForModels([model], target_time);
+
+  // Obtain the stream data for the model.
+  const stream_data = await models.getStreamValuesForModels(
+    [model],
+    target_time
+  );
+
   // Obtain the regressors of the model.
-  const regressors = await model.regressors(target_time, undefined);
+  const regressors = await model.regressors(
+    target_time,
+    weather,
+    stream_values
+  );
 
   // Using the regressors retrieve the predictions.
   const predicted_values = await model.predict(regressors);
