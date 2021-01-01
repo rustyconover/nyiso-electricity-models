@@ -12,7 +12,7 @@
   "scripts": {
     "deploy-lambda": "aws lambda update-function-code --function-name electricity-bot --s3-bucket weather-lambdas --s3-key bot.zip --publish",
     "build-lambda": "rm -f dist.zip && zip -9 -r dist.zip lambda/ && aws s3 cp dist.zip s3://weather-lambdas/bot.zip",
-    "build": "rm -rf dist lib lambda && webpack -c webpack.config.js",
+    "build": "rm -rf dist lib lambda && tsc && webpack -c webpack.config.js",
     "test": "ts-node test/simple-model.ts"
   },
   "keywords": [
